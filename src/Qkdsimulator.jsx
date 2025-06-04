@@ -7,9 +7,12 @@ import Loader from './Loader.jsx';
 import run from './assets/run.png';
 import code from './assets/code.png';
 
-const QBER = 0;
-const sifted_key = 'null';
+
+
 const Qkdsimulator = () => {
+  const [qber, setQber] = useState(null);
+  const [aliceKey, setAliceKey] = useState([]);
+  const [bobKey, setBobKey] = useState([]);
   const [protocol, setProtocol] = useState('DPS');
   const [distance, setDistance] = useState(10);
   const [showAlice, setShowAlice] = useState(false);
@@ -21,11 +24,34 @@ const Qkdsimulator = () => {
   const protocols = ['DPS', 'COW'];
   const errorModels = ['FibreLoss', 'DepolarNoise', 'T1T2Noise']
 
-  const handleRunSimulation = () => {
+  const handleRunSimulation = async () => {
     setIsRunning(true);
-    // Simulation logic would go here
-    setTimeout(() => setIsRunning(false), 2000);
+    try {
+      const response = await fetch('http://localhost:5000/simulate', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          num_pulses: 50,
+          delay: 1,
+          channel_length: distance,
+        }),
+      });
+  
+      if (!response.ok) {
+        throw new Error('Simulation failed');
+      }
+  
+      const data = await response.json();
+      setQber(data.qber);
+      setAliceKey(data.alice_key);
+      setBobKey(data.bob_key);
+    } catch (error) {
+      console.error('Error running simulation:', error);
+    } finally {
+      setIsRunning(false);
+    }
   };
+  
 
   const protocolCodes = {
     DPS: `import netsquid as ns
@@ -472,7 +498,7 @@ const protocolInfo ={
           </div>
         )}
         
-        {showAlice && showBob && (
+        {showAlice && showBob && qber!=null&& (
           <div className="connection-container">
             {!isRunning ? (
               <div className="connection-line" style={{ width: `${distance * 5}px` }}></div>
@@ -490,14 +516,17 @@ const protocolInfo ={
       </div>
       
       {/* Second line: QBER and Sifted Key (only during simulation) */}
-      {showAlice && showBob && isRunning && (
+      {showAlice && showBob && qber != null && !isRunning && (
         <div className="results-container">
           <div className="result-item">
-            <p>The QBER is {QBER}%</p>
+            <p>The QBER is {qber}%</p>
           </div>
           <div className="result-item">
-            <p>The Sifted key is {sifted_key}</p>
+          <p>Alice's Sifted Key: {aliceKey ? aliceKey.join(', ') : 'No key yet'}</p>
+          <p>Bob's Sifted Key: {bobKey ? bobKey.join(', ') : 'No key yet'}</p>
+            
           </div>
+          
         </div>
       )}
     </div>
