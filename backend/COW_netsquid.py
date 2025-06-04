@@ -141,7 +141,7 @@ class Bob(Protocol):
        # print("Type of msg.items[0]:", type(msg.items[0]))
 
         for recv_time, bit in self.recv_dict.items():
-            if any(abs(recv_time - t) == 0 for t in alice_decoy_times):
+            if any(abs(recv_time - t) <epsilon for t in alice_decoy_times):
                 pass
    
             else:
@@ -193,11 +193,10 @@ def run_cow_protocol(num_pulses=10, delay=1, depolar_rate=0.01, length=1, noise_
     #print("Actual sequence sent: ", alice_entity.sent_sequence)
     min_len = min(len(alice_entity.sifted_key_alice), len(bob_protocol.sifted_key))
 
-# Step 2: Select 20% of indices randomly
     sample_size = int(0.3 * min_len)
     sample_indices = random.sample(range(min_len), sample_size)
 
-# Step 3: Compare selected bits
+
     errors = sum(
     1 for i in sample_indices
     if alice_entity.sifted_key_alice[i] != bob_protocol.sifted_key[i]
