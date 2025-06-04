@@ -34,6 +34,7 @@ const Qkdsimulator = () => {
           num_pulses: 50,
           delay: 1,
           channel_length: distance,
+          protocol: protocol  // Send selected protocol to backend
         }),
       });
   
@@ -51,6 +52,7 @@ const Qkdsimulator = () => {
       setIsRunning(false);
     }
   };
+  
   
 
   const protocolCodes = {
