@@ -1,4 +1,30 @@
 /* QKDsimulator.css */
+:root {
+  font-family: Inter, sans-serif;
+  font-feature-settings: 'liga' 1, 'calt' 1;
+}
+@supports (font-variation-settings: normal) {
+  :root { font-family: InterVariable, sans-serif; }
+}
+:root {
+  --primary-color: #ffffff;
+  --secondary-color: #fafafa;
+  --dark-color: #121212;
+  --light-color: #1e1e1e;
+  --accent-color: #00b4d8;
+  --success-color: #2ecc71;
+  --text-color: #f0f0f0;
+  --text-light: #b0b0b0;
+  --white: #ffffff;
+  --gray: #2d2d2d;
+  --dark-gray: #888;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
 
 .quantum-line {
   display: flex;
@@ -21,7 +47,7 @@
 }
 
 .connection-line {
-  height: 2px;
+  height: 4px;
   background: linear-gradient(90deg, #6c63ff, #00b4d8);
 }
 
@@ -34,7 +60,7 @@
 }
 
 .result-item {
-  background-color: rgba(255, 255, 255, 0.1);
+  background-color: #00b4d8;
   padding: 8px 16px;
   border-radius: 4px;
 }
@@ -80,17 +106,15 @@
 
 select, input {
   padding: 8px 12px;
-  background-color: #2d2d2d;
-  border: 1px solid #383838;
-  border-radius: 4px;
+  background-color: #00b4d8;
+  border: 2px solid #383838;
+  border-radius: 0.8em;
   color: #f5f5f5;
 }
 
 .control-btn {
-  padding: 8px 16px;
-  background-color: #2d2d2d;
+  background-color: transparent;
   color: #f5f5f5;
-  border: 1px solid #383838;
   border-radius: 4px;
   cursor: pointer;
   transition: all 0.2s;
@@ -102,7 +126,7 @@ select, input {
 }
 
 .control-btn.active {
-  background-color: #6c63ff;
+  background-color: #00b4d8;
   color: white;
 }
 
@@ -124,12 +148,21 @@ select, input {
 }
 
 .simulation-area {
-  background-color: #1e1e1e;
+  width: 100%;
+  height: 100%;
+  /* Add your background pattern here */
+  background-color: #313131;
+  background-image: radial-gradient(rgba(255, 255, 255, 0.171) 2px, transparent 0);
+  background-size: 30px 30px;
+  background-position: -5px -5px;
   border-radius: 8px;
   padding: 20px;
-  min-height: 300px;
+  min-height: 400px;
   position: relative;
+  justify-content: space-between;
+  align-items: center;
 }
+
 
 .quantum-channel {
   display: flex;
@@ -140,18 +173,10 @@ select, input {
 }
 
 .entity {
-  padding: 15px 25px;
   border-radius: 8px;
   font-weight: bold;
 }
 
-.alice {
-  background-color: #000000;
-}
-
-.bob {
-  background-color: #000000;
-}
 
 .connection-line {
   height: 2px;
@@ -216,13 +241,117 @@ textarea {
   margin-top: 15px;
 }
 
-.save-btn {
-  background-color: #6c63ff !important;
+/* From Uiverse.io by adamgiebl */ 
+.cssbuttons-io {
+  position: relative;
+  font-family: inherit;
+  font-weight: 500;
+  font-size: 18px;
+  letter-spacing: 0.05em;
+  border-radius: 0.8em;
+  cursor: pointer;
+  border: none;
+  background: linear-gradient(to right, #8e2de2, #4a00e0);
+  color: ghostwhite;
+  overflow: hidden;
 }
 
-.code-btn {
-  display: flex;
-  justify-content: space-around;
+.cssbuttons-io svg {
+  width: 1.2em;
+  height: 1.2em;
+  margin-right: 0.5em;
+}
+
+.cssbuttons-io span {
+  position: relative;
+  z-index: 10;
+  transition: color 0.4s;
+  display: inline-flex;
   align-items: center;
-  background-color: black;
+  padding: 0.8em 1.2em 0.8em 1.05em;
+}
+
+.cssbuttons-io::before,
+.cssbuttons-io::after {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  z-index: 0;
+}
+
+.cssbuttons-io::before {
+  content: "";
+  background: #000;
+  width: 120%;
+  left: -10%;
+  transform: skew(30deg);
+  transition: transform 0.4s cubic-bezier(0.3, 1, 0.8, 1);
+}
+
+.cssbuttons-io:hover::before {
+  transform: translate3d(100%, 0, 0);
+}
+
+.cssbuttons-io:active {
+  transform: scale(0.95);
+}
+button {
+ appearance: none;
+ border: 0.125em solid #1A1A1A;
+ border-radius: 0.9375em;
+ box-sizing: border-box;
+ color: #ffffff;
+ cursor: pointer;
+ display: inline-block;
+ font-size: 16px;
+ font-weight: 600;
+ line-height: normal;
+ margin: 0;
+ min-height: 3.75em;
+ min-width: 0;
+ outline: none;
+ padding: 1em 2.3em;
+ text-align: center;
+ text-decoration: none;
+ transition: all 300ms cubic-bezier(.23, 1, 0.32, 1);
+ user-select: none;
+ -webkit-user-select: none;
+ touch-action: manipulation;
+ will-change: transform;
+}
+
+button:disabled {
+ pointer-events: none;
+}
+
+button:hover {
+ color: #fff;
+ background-color: #1A1A1A;
+ box-shadow: rgba(0, 0, 0, 0.25) 0 8px 15px;
+ transform: translateY(-2px);
+}
+
+button:active {
+ box-shadow: none;
+ transform: translateY(0);
+}
+.code-btn {
+  background-color: #00b4d8;
+}
+
+.info{
+  background-color: #000;
+  padding: 50px;
+}
+.visual-area{
+  padding-top: 50px;
+}
+.heading {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  background-color: #00b4d8;
+  margin: 30px;
 }

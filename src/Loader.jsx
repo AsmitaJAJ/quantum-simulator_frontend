@@ -15,6 +15,8 @@ const Loader = () => {
           <div className="loader-block" />
           <div className="loader-block" />
           <div className="loader-block" />
+          <div className="loader-block" />
+         
     
         </div>
       </div>

@@ -25,10 +25,10 @@ const QuantumCommunicationSimulator = () => {
         <div className="container">
           <div className="logo">Quantum Simulator</div>
           <ul className="nav-links">
-            <li><a href="#home">Home</a></li>
-            <li><a href="#features">Features</a></li>
-            <li><a href="#documentation">Documentation</a></li>
-            <li><Button/></li>
+            <li><a href="#home" className='menu__link'>Home</a></li>
+            <li><a href="#features" className='menu__link'>Features</a></li>
+            <li><a href="#documentation" className='menu__link'>Documentation</a></li>
+            <Button/>
           </ul>
         </div>
       </nav>
