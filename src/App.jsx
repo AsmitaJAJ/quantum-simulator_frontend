@@ -1,23 +1,12 @@
 import React, { useState } from 'react';
 import './App.css';
-import Button from './Button';
-import Button1 from './Button1';
+import GitNav from './GitNav';
+import ReadMore from './ReadMore';
 import icon from './assets/icon.gif';
 import qkd from './assets/qkd.png'
 import { Link } from 'react-router-dom';
-const QuantumCommunicationSimulator = () => {
-  const [email, setEmail] = useState('');
-  const [subscribed, setSubscribed] = useState(false);
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    // Here you would typically send the email to your backend
-    console.log('Submitted email:', email);
-    setSubscribed(true);
-    setEmail('');
-    setTimeout(() => setSubscribed(false), 3000);
-  };
-
+const App = () => {
   return (
     <div className="landing-page">
       {/* Navigation */}
@@ -28,7 +17,7 @@ const QuantumCommunicationSimulator = () => {
             <li><a href="#home" className='menu__link'>Home</a></li>
             <li><a href="#features" className='menu__link'>Features</a></li>
             <li><a href="#documentation" className='menu__link'>Documentation</a></li>
-            <Button/>
+            <GitNav/>
           </ul>
         </div>
       </nav>
@@ -43,11 +32,11 @@ const QuantumCommunicationSimulator = () => {
               Implement a combination of core quantum mechanics, networking protocols, and real-world constraints. 
               Visualise and simulate protocols before deploying.
             </p>
-            <Button1/>
+            <ReadMore/>
           </div>
           <div className="hero-image">
             <div className="quantum-visualization">
-                <img src={icon} height={250} width={500} alt="Logo" />
+                <img src={icon} height={250} width={500} alt="landing-page.gif" />
             </div>
           </div>
         </div>
@@ -59,9 +48,7 @@ const QuantumCommunicationSimulator = () => {
           <h2>Key Features</h2>
           <div className="features-grid">
             <div className="feature-card">
-              <Link to="qkd"><div className="feature-icon"><img src={qkd} height={100} width={100} alt="Logo" /> <h3>Quantum Key Distribution</h3></div>
-</Link>
-
+              <Link to="qkd"><div className="feature-icon"><img src={qkd} height={100} width={100} alt="Logo" /> <h3>Quantum Key Distribution</h3></div></Link>
               <p>Simulate QKD protocols with customizable parameters.</p>
             </div>
             <div className="feature-card">
@@ -85,4 +72,4 @@ const QuantumCommunicationSimulator = () => {
   );
 };
 
-export default QuantumCommunicationSimulator;
+export default App;

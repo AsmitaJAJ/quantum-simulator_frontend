@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const Button1 = () => {
+const ReadMore = () => {
   return (
     <StyledWrapper>
       <button id="bottone1"><strong>Read More</strong></button>
@@ -33,4 +33,4 @@ const StyledWrapper = styled.div`
    box-shadow: 7px 5px 56px -10px #C3D900;
   }`;
 
-export default Button1;
+export default ReadMore;

@@ -1,7 +1,7 @@
 import React from 'react';
 import styled from 'styled-components';
 
-const Button = () => {
+const GitNav = () => {
   return (
     <StyledWrapper>
       <button className="btn-github">
@@ -46,4 +46,4 @@ const StyledWrapper = styled.div`
     background-color: rgba(0, 0, 0, 0.5);
   }`;
 
-export default Button;
+export default GitNav;
