@@ -2,10 +2,8 @@ import React, { useState } from 'react';
 import alice from './assets/alice.svg';
 import bob from './assets/bob.svg';
 import './Qkdsimulator.css';
-import './Loader.jsx';
-import Loader from './Loader.jsx';
-import run from './assets/svgviewer-output.svg';
-import code from './assets/code.png';
+import LoadAnimation from './LoadAnimation.jsx';
+
 
 
 
@@ -49,7 +47,7 @@ const Qkdsimulator = () => {
   } catch (error) {
     console.error('Error running simulation:', error);
   } finally {
-    // Keep "Running..." for an extra 5 seconds (5000ms) after completion
+    // Keep "Running..." for an extra 2seconds (2000ms) after completion
     setTimeout(() => setIsRunning(false), 2000);
   }
 };
@@ -422,10 +420,7 @@ COW is simple, efficient, and suitable for long-distance fiber networks due to i
       <div className="control-panel">
         <div className="control-group">
           <label>select protocol</label>
-          <select 
-            value={protocol} 
-            onChange={(e) => setProtocol(e.target.value)}
-          >
+          <select value={protocol} onChange={(e) => setProtocol(e.target.value)}>
             {protocols.map(p => (
               <option key={p} value={p}>{p}</option>
             ))}
@@ -433,20 +428,11 @@ COW is simple, efficient, and suitable for long-distance fiber networks due to i
         </div>
 
         <div className="alice-bob">
-          <button 
-            className={`control-btn ${showAlice ? 'active' : ''}`}
-            onClick={() => setShowAlice(!showAlice)}
-          >
+          <button className={`control-btn ${showAlice ? 'active' : ''}`} onClick={() => setShowAlice(!showAlice)}>
             <img src={alice} height={76} width={78} alt="alice" />
-            
-            
           </button>
-          <button 
-            className={`control-btn ${showBob ? 'active' : ''}`}
-            onClick={() => setShowBob(!showBob)}
-          >
+          <button className={`control-btn ${showBob ? 'active' : ''}`} onClick={() => setShowBob(!showBob)}>
             <img src={bob} height={76} width={78} alt="bob" />
-
           </button>
         </div>
 
@@ -456,10 +442,11 @@ COW is simple, efficient, and suitable for long-distance fiber networks due to i
             type="number" 
             value={distance}
             onChange={(e) => setDistance(e.target.value)}
-            min="1"
-            max="100"
+            min="10"
+            max="500"
           />
         </div>
+
         <div className="control-group">
           <label>Select Error Model</label>
           <select 
@@ -479,7 +466,6 @@ COW is simple, efficient, and suitable for long-distance fiber networks due to i
             onClick={handleRunSimulation}
             disabled={isRunning}
           >
-        
             {isRunning ? 'Running...' : 'run'}
           </button>
         </div>
@@ -495,49 +481,51 @@ COW is simple, efficient, and suitable for long-distance fiber networks due to i
 
       <div className="simulation-area">
         <div className='visual-area'>
-  {(showAlice || showBob) && (
-    <div className="quantum-channel">
-      <div className="quantum-line">
-        {showAlice && (
-          <div className="entity">
-            <img src={alice} height={76} width={78} alt="alice" />
-          </div>
-        )}
-        
-        {showAlice && showBob && qber!=null&& (
-          <div className="connection-container">
-            {!isRunning ? (
-              <div>
-              <Loader/>
+          {(showAlice || showBob) && (
+            <div className="quantum-channel">
+            <div className="quantum-line">
+            {showAlice && (
+              <div className="entity">
+                <img src={alice} height={76} width={78} alt="alice" />
               </div>
-            ) : (
-              <div className="connection-line" style={{ width: `${distance * 5}px` }}></div>            )}
-          </div>
-        )}
-        
-        {showBob && (
-          <div className="entity">
-            <img src={bob} height={76} width={78} alt="bob" />
-          </div>
-        )}
-      </div>
-      {showAlice && showBob && qber != null && !isRunning && (
-        <div className="results-container">
-          <div className="result-item">
-            <p>The QBER is {qber}%</p>
-          </div>
-          <div className="result-item">
-          <p>Alice's Sifted Key: {aliceKey ? aliceKey.join(', ') : 'No key yet'}</p>
-          <p>Bob's Sifted Key: {bobKey ? bobKey.join(', ') : 'No key yet'}</p>
+            )}
             
+            {showAlice && showBob && qber!=null&& (
+              <div className="connection-container">
+                {!isRunning ? (
+                  <div>
+                  <LoadAnimation/>
+                  </div>
+                ) : (
+                  <div className="connection-line" style={{ width: `${distance * 5}px` }}></div>            )}
+              </div>
+            )}
+            
+            {showBob && (
+              <div className="entity">
+                <img src={bob} height={76} width={78} alt="bob" />
+              </div>
+            )}
           </div>
-          
+
+          {showAlice && showBob && qber != null && !isRunning && (
+            <div className="results-container">
+              <div className="result-item">
+                <p>The QBER is {qber}%</p>
+              </div>
+
+              <div className="result-item">
+              <p>Alice's Sifted Key: {aliceKey ? aliceKey.join(', ') : 'No key yet'}</p>
+              <p>Bob's Sifted Key: {bobKey ? bobKey.join(', ') : 'No key yet'}</p> 
+              </div>
+              
+            </div>
+          )}
+
         </div>
-      )}
-    </div>
-  )}
-  </div>
-</div>
+        )}
+        </div>
+      </div>
 
       <div className='info-area'>
       <div className='heading'><h3>{protocol} Information</h3></div>
