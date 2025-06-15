@@ -33,14 +33,19 @@ class Pulse:
         sigma = self.duration / 6
         return np.exp(-0.5 * ((t - t0) / sigma) ** 2)
 
-    def sample_photon_arrivals(self) -> list:
-        """Draws photon arrival times based on shape and MPN."""
+    def sample_photon_arrivals(self):
+        """Simulate actual photon arrivals from a weak coherent state."""
         if self.mean_photon_number <= 0:
             return []
 
         n_photons = np.random.poisson(self.mean_photon_number)
+        print(n_photons)
+
         if n_photons == 0:
-            return []
+            return []  # no detection event
+
+        
+        return [self] * n_photons
 
         # Get CDF of shape
         time_axis = np.linspace(0, self.duration, 1000)
