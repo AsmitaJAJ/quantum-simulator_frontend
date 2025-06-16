@@ -28,8 +28,8 @@ class QuantumChannel(OpticalChannel):
         loss_prob = self.compute_loss()
         if np.random.random() < loss_prob:
             return None  # Pulse lost
-        if np.random.random() < self.depol_prob:
-            pulse.state.depolarize() #defined in state.py
+        if pulse.quantum_state and np.random.random() < self.depol_prob:
+            pulse.quantum_state.depolarize()
         delay = self.compute_delay()
         return (pulse, delay)
     
