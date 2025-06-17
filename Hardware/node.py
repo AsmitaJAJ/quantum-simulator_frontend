@@ -1,4 +1,4 @@
-from channel import OpticalChannel
+from .channel import OpticalChannel
 class Node:
     def __init__(self, node_id, env):
         self.node_id=node_id
@@ -19,15 +19,17 @@ class Node:
         if sender_port_id not in self.connections:
             raise Exception(f"Port: {sender_port_id} not connected")
         receiver_node_id, receiver_port_id, channel = self.connections[sender_port_id]
+        
         result=channel.transmit(data)
         
         if result is None:
             print(f"Pulse lost during transmission on channel {channel.name}")
             return
         received_data, delay = result
-        
+        #received_data.timestamp = self.env.now #to get send time of pulse
         def delayed_delivery():
             yield self.env.timeout(delay)
+            #received_data.received_time = self.env.now
             receiver_node_id.receive(received_data, receiver_port_id)
 
         self.env.process(delayed_delivery())

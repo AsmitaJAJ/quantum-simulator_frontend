@@ -1,0 +1,96 @@
+import sys
+import os
+import simpy
+import numpy as np
+import random
+
+# Ensure parent directory is in path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from Hardware.lasers import Laser
+from Hardware.node import Node
+from Hardware.channel import QuantumChannel
+
+
+class Alice(Node):
+    def __init__(self, node_id, env, num_pulses):
+        super().__init__(node_id, env)
+        self.num_pulses = num_pulses
+        self.sent_pulses = []  # List of (pulse_id, phase)
+        self.actual_key = []
+
+    def get_alice_bits(self):
+        phase_dict = dict(self.sent_pulses)
+        self.actual_key = []
+
+        for i in range(self.num_pulses):  # from 0 to n-1
+            if i in phase_dict and (i+1) in phase_dict:
+                phase1 = phase_dict[i]
+                phase2 = phase_dict[i+1]
+                phase_diff = (phase2 - phase1) % (2 * np.pi)
+                bit = 0 if abs(phase_diff) < 1e-6 or abs(phase_diff - 2 * np.pi) < 1e-6 else 1
+                self.actual_key.append((i, bit))
+
+        return self.actual_key
+
+    def run(self, port_id):
+        laser = Laser(wavelength=1550e-9, amplitude=1.0)
+        self.add_component("laser", laser)
+
+        for i in range(self.num_pulses + 1):  # +1 needed for DPS
+            phase = np.random.choice([0, np.pi])
+            pulse = laser.emit_pulse(duration=70e-12, phase=phase)
+            pulse.mean_photon_number = 0.2
+            pulse.pulse_id = i
+            self.sent_pulses.append((i, phase))
+            self.send(port_id, pulse)
+            yield self.env.timeout(1e-9)
+
+
+class Bob(Node):
+    def __init__(self, node_id, env):
+        super().__init__(node_id, env)
+        self.received_pulses = {}  # pulse_id → phase
+        self.bits = []  # list of (i, bit)
+
+    def receive(self, pulse, receiver_port_id):
+        if pulse is not None:
+            pid = pulse.pulse_id
+            self.received_pulses[pid] = pulse.phase
+
+            if (pid - 1) in self.received_pulses:
+                prev_phase = self.received_pulses[pid - 1]
+                phase_diff = (pulse.phase - prev_phase) % (2 * np.pi)
+                bit = 0 if abs(phase_diff) < 1e-6 or abs(phase_diff - 2 * np.pi) < 1e-6 else 1
+                self.bits.append((pid - 1, bit))
+
+
+if __name__ == "__main__":
+    env = simpy.Environment()
+
+    num_pulses = 10
+    alice = Alice("Alice", env, num_pulses=num_pulses)
+    bob = Bob("Bob", env)
+
+    alice.assign_port("qport", "quantum_out")
+    bob.assign_port("qport", "quantum_in")
+
+    channel = QuantumChannel("Channel_Alice_Bob", length_meters=10, attenuation_db_per_m=0.0003, depol_prob=0.0)
+    alice.connect_nodes("qport", "qport", bob, channel)
+
+    env.process(alice.run("qport"))
+    env.run(until=(num_pulses + 2) * 1e-6)
+
+    print("Alice pulses sent: ", len(alice.sent_pulses))
+    print("Bob pulses received: ", len(bob.received_pulses))
+
+    alice_key_dict = dict(alice.get_alice_bits())
+    bob_key_dict = dict(bob.bits)
+
+    print("Alice bits: ", len(alice_key_dict))
+    print("Bob bits: ", len(bob_key_dict))
+
+    common_ids = set(alice_key_dict.keys()) & set(bob_key_dict.keys())
+    errors = sum(1 for i in common_ids if alice_key_dict[i] != bob_key_dict[i])
+    qber = errors / len(common_ids) if common_ids else 0
+    print("QBER: ", qber)

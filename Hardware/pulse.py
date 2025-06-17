@@ -14,6 +14,7 @@ class Pulse:
         self.energy = self.calculate_energy()
         self.mean_photon_number = self.energy / self.photon_energy()
         self.quantum_state = quantum_state
+        self.timestamp=None
 
     def photon_energy(self) -> float:
         """Returns energy of a single photon at the pulse's wavelength."""

@@ -1,7 +1,7 @@
 '''transmittance=10^(-alpha*L/10), loss=1-transmittance. alpha= attenuation in dB/mm'''
 
 import numpy as np
-from state import QuantumState
+from .state import QuantumState
 class OpticalChannel:
     def __init__(self, name, length_meters, attenuation_db_per_m, light_speed=2e8):
         self.name = name #name of channel
