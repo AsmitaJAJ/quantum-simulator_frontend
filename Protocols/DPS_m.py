@@ -23,21 +23,19 @@ class Alice(Node):
     def get_alice_bits(self):
         self.actual_key = []
 
-        # Sort by timestamp
-       # self.sent_pulses.sort(key=lambda p: p.timestamp)
 
-        for i in range(len(self.sent_pulses) - 1):
-            p1 = self.sent_pulses[i]
-            p2 = self.sent_pulses[i + 1]
+        for i in range(len(self.sent_log) - 1):
+            t1, _, p1 = self.sent_log[i]
+            t2, _, p2 = self.sent_log[i + 1]
 
-            if p1.timestamp is None or p2.timestamp is None:
+            if t1 is None or t2 is None:
                 continue
 
-            time_diff = abs(p2.timestamp - p1.timestamp)
+            time_diff = abs(t2-t1)
             if abs(time_diff - 1e-9) < 1e-12:  # Allow for numerical tolerance
                 phase_diff = (p2.phase - p1.phase) % (2 * np.pi)
                 bit = 0 if abs(phase_diff) < 1e-6 or abs(phase_diff - 2 * np.pi) < 1e-6 else 1
-                self.actual_key.append((p1.timestamp, bit))
+                self.actual_key.append((t1, bit))
 
         return self.actual_key
 
@@ -50,7 +48,7 @@ class Alice(Node):
             pulse = laser.emit_pulse(duration=70e-12, phase=phase)
             pulse.mean_photon_number = 0.2
             pulse.pulse_id = i
-            pulse.timestamp = self.env.now  # Store send time locally in protocol, want to implement this via node
+            
             self.sent_pulses.append(pulse)
             self.send(port_id, pulse)
             yield self.env.timeout(1e-9)
@@ -63,16 +61,23 @@ class Bob(Node):
         self.bits = []  # (timestamp, bit)
 
     def receive(self, pulse, receiver_port_id):
-        if pulse is not None:
-            pid = pulse.pulse_id
-            recv_time = self.env.now  # Reception time
-            self.received_pulses[pid] = (pulse.phase, recv_time)
+        
+        super().receive(pulse, receiver_port_id) #because we're overriding receive, but still want base behaviour
+        
+        if pulse is not None and pulse.pulse_id is not None:
+            recv_time = self.env.now
+            self.received_pulses[pulse.pulse_id] = (pulse.phase, recv_time)
 
-            if (pid - 1) in self.received_pulses:
-                prev_phase, prev_time = self.received_pulses[pid - 1]
-                phase_diff = (pulse.phase - prev_phase) % (2 * np.pi)
+           
+            pulse_map = {p.pulse_id: (t, p) for t, _, p in self.recv_log if hasattr(p, 'pulse_id')}
+            pid = pulse.pulse_id
+
+            if (pid - 1) in pulse_map:
+                prev_time, prev_pulse = pulse_map[pid - 1]
+                phase_diff = (pulse.phase - prev_pulse.phase) % (2 * np.pi)
                 bit = 0 if abs(phase_diff) < 1e-6 or abs(phase_diff - 2 * np.pi) < 1e-6 else 1
                 self.bits.append((prev_time, bit))
+
 
 
 if __name__ == "__main__":
@@ -94,13 +99,13 @@ if __name__ == "__main__":
     )
     alice.connect_nodes("qport", "qport", bob, channel)
 
-    env.process(alice.run("qport")) #registers the genrator object returned by alice.run() as a simpy process
+    env.process(alice.run("qport")) #registers the genrator object(given by yield..) returned by alice.run() as a simpy process
     env.run(until=(num_pulses + 10) * 1e-6)
 
-    # Extract keys
+  
     print("Alice pulses sent: ", len(alice.sent_pulses))
     print("Bob pulses received: ", len(bob.received_pulses))
-    def quantize_time(t, resolution=1e-12):  # 1 picosecond
+    def quantize_time(t, resolution=1e-12):  
         return round(t / resolution) * resolution
 
 
@@ -119,10 +124,7 @@ if __name__ == "__main__":
 
     # Matching timestamps from both
     common_times = set(alice_key_dict.keys()) & set(bob_key_dict.keys())
-   # print("Commmon times: ", len(common_times))
-    #print("Alice key: ", alice_key_dict)
-    #print("Bob key: ", bob_key_dict)
-    
+ 
     errors = sum(1 for t in common_times if alice_key_dict[t] != bob_key_dict[t])
     qber = errors / len(common_times) if common_times else 0
     print("QBER: ", qber)
