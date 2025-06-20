@@ -1,5 +1,5 @@
-from pulse import Pulse
-from state import QuantumState
+from .pulse import Pulse
+from .state import QuantumState
 import numpy as np
 
 class Laser:
