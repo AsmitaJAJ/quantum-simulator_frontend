@@ -18,7 +18,7 @@ class Node:
     def connect_nodes(self, sender_port_id, receiver_port_id, receiver_node_id, channel_obj):
         self.connections[sender_port_id]=(receiver_node_id, receiver_port_id, channel_obj)
         
-    def send(self, sender_port_id,  data, num_pulses=1):
+    def send(self, sender_port_id,  data):
         if sender_port_id not in self.connections:
             raise Exception(f"Port: {sender_port_id} not connected")
         receiver_node_id, receiver_port_id, channel = self.connections[sender_port_id]
