@@ -1,0 +1,36 @@
+class ProtocolHandler:
+    def __init__(self, protocol_name, node_factory, channel_factory, run_function):
+        self.protocol_name = protocol_name
+        self.node_factory = node_factory
+        self.channel_factory = channel_factory
+        self.run_function = run_function
+
+    def run(self, config):
+        """
+        config: dict with structure like:
+        {
+            "env": simpy.Environment(),
+            "nodes": {
+                "Alice": {"role": "Sender", "args": {...}},
+                "Bob":   {"role": "Receiver", "args": {...}}
+            },
+            "channel": {
+                "endpoints": ("Alice", "Bob"),
+                "args": {...}
+            },
+            "protocol_args": {...}
+        }
+        """
+        env = config["env"]
+        node_objs = {}
+        
+        for node_id, node_info in config["nodes"].items():
+            role = node_info["role"]
+            args = node_info["args"]
+            node_objs[node_id] = self.node_factory(node_id, role, env, **args)
+
+        a, b = config["channel"]["endpoints"]
+        channel_args = config["channel"]["args"]
+        channel = self.channel_factory(a, b, **channel_args)
+
+        self.run_function(node_objs[a], node_objs[b], channel, env, **config.get("protocol_args", {}))

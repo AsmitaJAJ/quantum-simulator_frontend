@@ -3,7 +3,7 @@ from scipy.constants import h, c  # Planck's constant and speed of light
 
 class Pulse:
     def __init__(self, wavelength: float, duration: float, amplitude: float,
-                 phase= 0.0, shape: callable = None, quantum_state=None):
+                 phase= 0.0, shape: callable = None, quantum_state=None,polarization=None):
         
         self.wavelength = wavelength
         self.duration = duration
@@ -15,6 +15,8 @@ class Pulse:
         self.mean_photon_number = self.energy / self.photon_energy()
         self.quantum_state = quantum_state
         self.timestamp=None
+        # Polarization (in degrees, for PBS etc.), e.g. 0=H, 90=V, 45=D, 135=A
+        self.polarization = polarization
 
     def photon_energy(self) -> float:
         """Returns energy of a single photon at the pulse's wavelength."""
@@ -40,7 +42,7 @@ class Pulse:
             return []
 
         n_photons = np.random.poisson(self.mean_photon_number)
-        print(n_photons)
+        #print(n_photons)
 
         if n_photons == 0:
             return []  # no detection event

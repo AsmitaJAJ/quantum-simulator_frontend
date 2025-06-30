@@ -1,30 +1,42 @@
+import sys
+import os
+
 import simpy
-import numpy as np
 
-from node import Node
-from channel import QuantumChannel
-from lasers import Laser
-from state import QuantumState
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 
-env = simpy.Environment()
+from Topology.topology import StarTopology
+from Protocols.DPS import node_factory as dps_node, run_dps
+from Protocols.COW import node_factory as cow_node , run_cow
+from Protocols.DPS import channel_factory as dps_channel
+from Protocols.COW import channel_factory as cow_channel
 
-node_A = Node("A", env)
-node_B = Node("B", env)
+node_specs = {
+    "Alice":   {"type": "Sender",   "factory": dps_node},
+    "Bob":     {"type": "Receiver", "factory": dps_node},
+    "Charlie": {"type": "Receiver", "factory": dps_node}
+}
 
-node_A.assign_port("port1", "to_B")
-node_B.assign_port("port2", "from_A")
+channel_specs = {
+    ("Alice", "Bob"): dps_channel,
+    ("Alice", "Charlie"): dps_channel
+}
 
+topo = StarTopology(
+    center_node_id="Alice",
+    leaf_node_ids=["Bob", "Charlie"],
+    node_specs=node_specs,
+    channel_specs=channel_specs
+)
 
-laser = Laser(wavelength=1550e-9, amplitude=1.0)
-node_A.add_component("laser", laser)
+env1 = simpy.Environment()
+topo.buildTopology(env1, num_pulses=1000)
 
-channel = QuantumChannel(name="A->B", length_meters=20, attenuation_db_per_m=0.2, depol_prob=0.1)
-
-node_A.connect_nodes("port1", "port2", node_B, channel)
-
-plus_state = QuantumState(1 / np.sqrt(2) * np.array([1, 1]))
-pulse = laser.emit_pulse(duration=1e-9, phase=0.0, quantum_state=plus_state)
-
-node_A.send("port1", pulse)
-
-env.run(until=1e-6)  # Run for 1 microsecond
+alice = topo.get_node("Alice")
+charlie=topo.get_node("Charlie")
+bob = topo.get_node("Bob")
+channel = topo.channels[("Alice", "Bob")]
+env2=simpy.Environment()
+topo.buildTopology(env2, num_pulses=1000)
+run_dps(alice, bob, channel, env1, num_pulses=1000)
+run_dps(alice, charlie, channel, env2, num_pulses=1000)
