@@ -2,7 +2,7 @@
 import React, { useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-//import './network.css';
+import './network.css';
 
 const cities = ['Mumbai', 'Pune', 'Bangalore', 'Chennai', 'Surat', 'Nagpur'];
 const cityCoordinates = {
@@ -94,8 +94,8 @@ function Network() {
   });
 
   return (
-    <div className="container">
-      <div className="sidebar">
+    <div className="container1">
+      <div className="sidebar1">
         <div className="form-group">
           <label>Select no. nodes</label>
           <select value={numNodes} onChange={e => {
@@ -161,7 +161,7 @@ function Network() {
         )}
       </div>
       <div className='content-imp'>
-      <div className="main visualize-container">
+      <div className="main1 visualize-container">
         <div className="map-container" style={{ height: '500px', width: '600px' }}>
           <MapContainer
             center={[22.5937, 78.9629]}
