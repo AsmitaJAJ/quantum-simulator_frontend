@@ -58,14 +58,14 @@ bb84_handler = ProtocolHandler(
 dps_config = {
     "env": env_dps,
     "nodes": {
-        "Alice": {"role": "Sender", "args": {"num_pulses": 10}},
+        "Alice": {"role": "Sender", "args": {"num_pulses": 10}}, #num pulses taken from here
         "Bob":   {"role": "Receiver", "args": {}}
     },
     "channel": {
         "endpoints": ("Alice", "Bob"),
         "args": {"length_meters": 90000, "attenuation_db_per_m": 0.0002, "depol_prob": 0.1}
     },
-    "protocol_args": {"num_pulses": 10}
+    "protocol_args": {"num_pulses": 10_00_000}
 }
 
 cow_config = {
@@ -78,23 +78,54 @@ cow_config = {
         "endpoints": ("Alice", "Charlie"),
         "args": {"length_meters": 90000, "attenuation_db_per_m": 0.0002, "depol_prob": 0.1}
     },
-    "protocol_args": {"num_pulses": 10}
+    "protocol_args": {"num_pulses": 100}
 }
 
 bb84_config = {
     "env": env_bb84,
     "nodes": {
-        "Alice": {"role": "Sender", "args": {"num_pulses": 10}},
+        "Alice": {"role": "Sender", "args": {"num_pulses": 100}}, #num pulses from here
         "Bob":   {"role": "Receiver", "args": {}}
     },
     "channel": {
         "endpoints": ("Alice", "Bob"),
-        "args": {"length_meters": 90000, "attenuation_db_per_m": 0.0002, "depol_prob": 0.1}
+        "args": {"length_meters": 1, "attenuation_db_per_m": 0.0000, "depol_prob": 0.1}
     },
-    "protocol_args": {"num_pulses": 1000}
+    "protocol_args": {"num_pulses": 10000}
 }
 
 # --- Run protocols ---
-dps_handler.run(dps_config)
-cow_handler.run(cow_config)
-bb84_handler.run(bb84_config)
+#dps_handler.run(dps_config)
+#cow_handler.run(cow_config)
+#bb84_handler.run(bb84_config)
+
+# --- Run and Print QBERs ---
+# --- Run and Print QBERs + Logs ---
+for handler, config in [
+    (dps_handler, dps_config),
+    (cow_handler, cow_config),
+    (bb84_handler, bb84_config)
+]:
+    handler.run(config)
+
+    protocol_name = handler.protocol_name
+    endpoints = config["channel"]["endpoints"]
+    qber = handler.qber
+
+    print(f"\n--- Protocol: {protocol_name} ---")
+    print(f"Link: {endpoints[0]} <--> {endpoints[1]}")
+    print(f"QBER: {qber:.4f}")
+
+    # Print send and receive logs
+    for node_name, node_cfg in config["nodes"].items():
+        node = handler.node_objs.get(node_name)
+        if not node:
+            print(f"{node_name} not found in node_map.")
+            continue
+
+        last_sent  = node.sent_log[-1][0] if node.sent_log else None
+        last_recv  = node.recv_log[-1][0] if node.recv_log else None
+
+        print(f"Node: {node_name}")
+        print(f"  Last sent time:  {last_sent:.2e} s" if last_sent is not None else "  No sends recorded.")
+        print(f"  Last recv time:  {last_recv:.2e} s" if last_recv is not None else "  No receives recorded.")

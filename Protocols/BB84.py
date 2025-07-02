@@ -151,20 +151,22 @@ def run_bb84(alice: Alice, bob: Bob, channel:QuantumChannel, env, num_pulses=100
         sifted_alice.append(alice.bits[i])
         sifted_bob.append(bob_bit)
 
-    print(f"Alice sifted key: {sifted_alice}")
-    print(f"Bob   sifted key: {sifted_bob}")
-    print(f"Sifted key length: {len(sifted_alice)}")
+    #print(f"Alice sifted key: {sifted_alice}")
+    #print(f"Bob   sifted key: {sifted_bob}")
+    #print(f"Sifted key length: {len(sifted_alice)}")
 
     if sifted_alice:
         errors = sum(a != b for a, b in zip(sifted_alice, sifted_bob))
         qber   = errors / len(sifted_alice)
-        print(f"QBER on sifted key: {qber:.2%}")
+        
+        #print(f"QBER on sifted key: {qber:.2%}")
         return qber
     else:
+        return 0.0
         print("No sifted bits to compute QBER.")
    
 
-def node_factory(name, role, env, num_pulses=10_00_000):
+def node_factory(name, role, env, num_pulses=10000):
     if role == "Sender":
         return Alice(name, env, num_pulses=num_pulses)
     elif role == "Receiver":
@@ -181,7 +183,4 @@ def channel_factory(a, b, length_meters, attenuation_db_per_m, depol_prob):
         attenuation_db_per_m= attenuation_db_per_m,
         depol_prob=depol_prob
     )
-
-
-
 
