@@ -1,8 +1,10 @@
 // QuantumTopologySelector.jsx
+import axios from 'axios';
+
 import React, { useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
-//import './network.css';
+import './network.css';
 
 const cities = ['Mumbai', 'Pune', 'Bangalore', 'Chennai', 'Surat', 'Nagpur'];
 const cityCoordinates = {
@@ -62,6 +64,7 @@ function Network() {
   const [edges, setEdges] = useState([]);
   const [submitted, setSubmitted] = useState(false);
   const [visualize, setVisualize] = useState(false);
+  const [simulationResults, setSimulationResults] = useState([]);
 
   const handleCityChange = (index, value) => {
     const updated = [...selectedCities];
@@ -83,8 +86,24 @@ function Network() {
   };
 
   const handleRun = () => {
-    setVisualize(true);
+    const payload = {
+      cities: selectedCities,
+      topology: topology,
+      edges: edges,
+      protocols: protocolsPerEdge
+    };
+  
+    axios.post("http://localhost:5000/simulate", payload)
+      .then(response => {
+        setSimulationResults(response.data.results);
+        setVisualize(true);
+      })
+      .catch(error => {
+        console.error("Simulation error:", error);
+        alert("Simulation failed. Check backend logs.");
+      });
   };
+  
 
   const allCitiesSelected = selectedCities.every(city => city);
   const allProtocolsSelected = edges.every(([a, b]) => {
@@ -94,8 +113,8 @@ function Network() {
   });
 
   return (
-    <div className="container">
-      <div className="sidebar">
+    <div className="container1">
+      <div className="sidebar1">
         <div className="form-group">
           <label>Select no. nodes</label>
           <select value={numNodes} onChange={e => {
@@ -161,7 +180,7 @@ function Network() {
         )}
       </div>
       <div className='content-imp'>
-      <div className="main visualize-container">
+      <div className="main1 visualize-container">
         <div className="map-container" style={{ height: '500px', width: '600px' }}>
           <MapContainer
             center={[22.5937, 78.9629]}
@@ -192,38 +211,42 @@ function Network() {
             })}
           </MapContainer>
         </div>
-
         {visualize && (
-          <div className="results right-of-map">
-            <h3>Results</h3>
-            <table>
-              <thead>
-                <tr>
-                  <th>Edge</th>
-                  <th>City A</th>
-                  <th>City B</th>
-                  <th>Distance (km)</th>
-                  <th>Protocol</th>
-                </tr>
-              </thead>
-              <tbody>
-                {edges.map(([a, b], index) => {
-                  const dist = haversineDistance(cityCoordinates[a], cityCoordinates[b]);
-                  const protocol = protocolsPerEdge[`${a}-${b}`] || protocolsPerEdge[`${b}-${a}`];
-                  return (
-                    <tr key={index}>
-                      <td>{index + 1}</td>
-                      <td>{a}</td>
-                      <td>{b}</td>
-                      <td>{dist}</td>
-                      <td>{protocol}</td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        )}
+  <div className="results right-of-map">
+    <h3>Simulation Results</h3>
+    <table>
+      <thead>
+        <tr>
+          <th>#</th>
+          <th>Link</th>
+          <th>Protocol</th>
+          <th>QBER</th>
+          <th>Sender Last Sent</th>
+          <th>Receiver Last Recv</th>
+        </tr>
+      </thead>
+      <tbody>
+        {simulationResults.map((res, idx) => {
+          const nodes = Object.keys(res.nodes);
+          const sender = nodes.find(n => res.nodes[n].last_sent_time);
+          const receiver = nodes.find(n => res.nodes[n].last_recv_time);
+
+          return (
+            <tr key={idx}>
+              <td>{idx + 1}</td>
+              <td>{res.link}</td>
+              <td>{res.protocol}</td>
+              <td>{res.qber}</td>
+              <td>{sender ? res.nodes[sender].last_sent_time : "N/A"}</td>
+              <td>{receiver ? res.nodes[receiver].last_recv_time : "N/A"}</td>
+            </tr>
+          );
+        })}
+      </tbody>
+    </table>
+  </div>
+)}
+
       </div>
       </div>
     </div>

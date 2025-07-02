@@ -159,7 +159,7 @@ def run_cow(alice, bob, channel, env, num_pulses=1000):
     errors = sum(1 for t in common if alice_key[t] != bob_key[t])
     qber = errors / len(common) if common else 0
     rate = len(common) / ((num_pulses * 2) * 1e-9)
-
+    return qber
     print("Alice pulses sent:", num_pulses * 2)
     print("Bob sifted bits  :", len(bob.sifted_key))
     print("Matched key bits :", sorted(common))

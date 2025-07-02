@@ -28,7 +28,7 @@ class Node:
         result=channel.transmit(data)
         
         if result is None:
-            print(f"Pulse lost during transmission on channel {channel.name}")
+            #print(f"Pulse lost during transmission on channel {channel.name}")
             return
         received_data, delay = result
         
@@ -44,7 +44,7 @@ class Node:
     def receive(self, data, receiver_port_id):
         recv_time = self.env.now
         self.recv_log.append((recv_time, receiver_port_id, data))
-        if hasattr(data, 'quantum_state'):
+        '''if hasattr(data, 'quantum_state'):
             print(f"[{self.node_id}] Received pulse on port '{receiver_port_id}':")
             print(f"  - Wavelength: {data.wavelength} m")
             print(f"  - Duration: {data.duration} s")
@@ -52,4 +52,4 @@ class Node:
             print(f"  - Phase: {data.phase}")
             print(f"  - Quantum State: {data.quantum_state}")
         else:
-            print(f"[{self.node_id}] Received classical data on port '{receiver_port_id}': {data}")
+            print(f"[{self.node_id}] Received classical data on port '{receiver_port_id}': {data}")'''

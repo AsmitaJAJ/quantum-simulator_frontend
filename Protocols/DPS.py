@@ -95,9 +95,9 @@ def run_dps(alice: Alice, bob: Bob, channel:QuantumChannel, env, num_pulses=1000
     env.run(until=sim_time)
 
     # --- Stats & Key Extraction ---
-    print(f"Alice pulses sent:     {len(alice.sent_pulses)}")
-    print(f"Bob pulses received:   {len(bob.received_pulses)}")
-    print(f"Bob key bits extracted: {len(bob.bits)}")
+    #print(f"Alice pulses sent:     {len(alice.sent_pulses)}")
+    #print(f"Bob pulses received:   {len(bob.received_pulses)}")
+    #print(f"Bob key bits extracted: {len(bob.bits)}")
 
 
     bob_ids, bob_next_ids, bob_bits = zip(*bob.bits) if bob.bits else ([], [], [])
@@ -122,14 +122,10 @@ def run_dps(alice: Alice, bob: Bob, channel:QuantumChannel, env, num_pulses=1000
     L = len(final_bob_bits)
     errors = sum(a != b for a, b in zip(final_alice_bits, final_bob_bits))
     qber = errors / L if L else 0
-
+    return qber
     print("First 10 matched Alice bits:", final_alice_bits[:10])
     print("First 10 matched Bob bits:  ", final_bob_bits[:10])
     print(f"QBER (Quantum Bit Error Rate): {qber:.3f}")
-    
-
-
-
 
 def node_factory(name, role, env, num_pulses=10_00_000):
     if role == "Sender":
