@@ -139,10 +139,12 @@ def node_factory(name, role, env, num_pulses=10_00_000):
         return Node(name, env)
 
 
-def channel_factory(a, b, length_meters, attenuation_db_per_m, depol_prob):
+def channel_factory (a, b, length_meters, attenuation_db_per_m, depol_prob, pol_err_std=None):
     return QuantumChannel(
         name=f"{a}_{b}",
         length_meters=length_meters,
         attenuation_db_per_m= attenuation_db_per_m,
-        depol_prob=depol_prob
+        depol_prob=depol_prob,
+        pol_err_std=pol_err_std
     )
+
