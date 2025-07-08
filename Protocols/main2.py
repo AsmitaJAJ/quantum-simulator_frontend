@@ -65,33 +65,33 @@ dps_config = {
         "endpoints": ("Alice", "Bob"),
         "args": {"length_meters": 90000, "attenuation_db_per_m": 0.0002, "depol_prob": 0.1}
     },
-    "protocol_args": {"num_pulses": 10_00_000}
+    "protocol_args": {"num_pulses": 10}
 }
 
 cow_config = {
     "env": env_cow,
     "nodes": {
-        "Alice":   {"role": "Sender", "args": {"num_pulses": 1000, "decoy_prob": 0.1}},
+        "Alice":   {"role": "Sender", "args": {"num_pulses": 10, "decoy_prob": 0.1}},
         "Charlie": {"role": "Receiver", "args": {}}
     },
     "channel": {
         "endpoints": ("Alice", "Charlie"),
         "args": {"length_meters": 90000, "attenuation_db_per_m": 0.0002, "depol_prob": 0.1}
     },
-    "protocol_args": {"num_pulses": 100}
+    "protocol_args": {"num_pulses": 10}
 }
 
 bb84_config = {
     "env": env_bb84,
     "nodes": {
-        "Alice": {"role": "Sender", "args": {"num_pulses": 100}}, #num pulses from here
+        "Alice": {"role": "Sender", "args": {"num_pulses": 1000000}}, #num pulses from here
         "Bob":   {"role": "Receiver", "args": {}}
     },
     "channel": {
         "endpoints": ("Alice", "Bob"),
-        "args": {"length_meters": 1, "attenuation_db_per_m": 0.0000, "depol_prob": 0.1}
+        "args": {"length_meters": 90000, "attenuation_db_per_m": 0.0002, "depol_prob": 0.1, "pol_err_std": 1.0}
     },
-    "protocol_args": {"num_pulses": 10000}
+    "protocol_args": {"num_pulses": 1000000}
 }
 
 # --- Run protocols ---

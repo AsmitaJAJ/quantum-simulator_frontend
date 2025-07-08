@@ -1,6 +1,4 @@
-// QuantumTopologySelector.jsx
 import axios from 'axios';
-
 import React, { useState } from 'react';
 import { MapContainer, TileLayer, Marker, Popup, Polyline } from 'react-leaflet';
 import 'leaflet/dist/leaflet.css';
@@ -80,7 +78,19 @@ function Network() {
 
   const handleGenerateEdges = () => {
     const edgesGenerated = generateEdges(topology, selectedCities);
-    setEdges(edgesGenerated);
+
+    const enrichedEdges = edgesGenerated.map(([a, b]) => {
+      const coordA = cityCoordinates[a];
+      const coordB = cityCoordinates[b];
+      if (!coordA || !coordB) return null;
+
+      const distanceKm = haversineDistance(coordA, coordB);
+      const distanceMeters = Math.round(distanceKm * 1000);
+
+      return { nodes: [a, b], distance: distanceMeters };
+    }).filter(Boolean);
+
+    setEdges(enrichedEdges);
     setSubmitted(true);
     setVisualize(false);
   };
@@ -92,7 +102,7 @@ function Network() {
       edges: edges,
       protocols: protocolsPerEdge
     };
-  
+
     axios.post("http://localhost:5000/simulate", payload)
       .then(response => {
         setSimulationResults(response.data.results);
@@ -103,10 +113,10 @@ function Network() {
         alert("Simulation failed. Check backend logs.");
       });
   };
-  
 
   const allCitiesSelected = selectedCities.every(city => city);
-  const allProtocolsSelected = edges.every(([a, b]) => {
+  const allProtocolsSelected = edges.every(edge => {
+    const [a, b] = edge.nodes;
     const key1 = `${a}-${b}`;
     const key2 = `${b}-${a}`;
     return protocolsPerEdge[key1] || protocolsPerEdge[key2];
@@ -158,11 +168,12 @@ function Network() {
         {submitted && (
           <div className="form-group">
             <label>Select protocols for edges</label>
-            {edges.map(([a, b]) => {
+            {edges.map((edge) => {
+              const [a, b] = edge.nodes;
               const edgeKey = `${a}-${b}`;
               return (
                 <div key={edgeKey} className="protocol-select">
-                  <span>{a} - {b}</span>
+                  <span>{a} - {b} </span>
                   <select
                     value={protocolsPerEdge[edgeKey] || ''}
                     onChange={e => handleProtocolChange(edgeKey, e.target.value)}>
@@ -179,75 +190,93 @@ function Network() {
           </div>
         )}
       </div>
+
       <div className='content-imp'>
-      <div className="main1 visualize-container">
-        <div className="map-container" style={{ height: '500px', width: '600px' }}>
-          <MapContainer
-            center={[22.5937, 78.9629]}
-            zoom={4}
-            minZoom={4}
-            maxZoom={6}
-            style={{ height: '100%', width: '100%' }}
-            scrollWheelZoom={true}
-            maxBounds={[[6.5, 67], [38.5, 97]]}
-            maxBoundsViscosity={1.0}
-          >
-            <TileLayer
-              attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
-              url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
-            />
-            {selectedCities.filter(c => cityCoordinates[c]).map((city, idx) => (
-              <Marker key={idx} position={cityCoordinates[city]}>
-                <Popup>{city}</Popup>
-              </Marker>
-            ))}
-            {edges.map(([cityA, cityB], i) => {
-              const coordA = cityCoordinates[cityA];
-              const coordB = cityCoordinates[cityB];
-              if (coordA && coordB) {
-                return <Polyline key={i} positions={[coordA, coordB]} pathOptions={{ color: 'red', weight: 3 }} />;
-              }
-              return null;
-            })}
-          </MapContainer>
+        <div className="main1 visualize-container">
+          <div className="map-container" style={{ height: '500px', width: '600px' }}>
+            <MapContainer
+              center={[22.5937, 78.9629]}
+              zoom={4}
+              minZoom={4}
+              maxZoom={6}
+              style={{ height: '100%', width: '100%' }}
+              scrollWheelZoom={true}
+              maxBounds={[[6.5, 67], [38.5, 97]]}
+              maxBoundsViscosity={1.0}
+            >
+              <TileLayer
+                attribution='&copy; <a href="https://www.openstreetmap.org/copyright">OpenStreetMap</a> contributors'
+                url="https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png"
+              />
+              {selectedCities.filter(c => cityCoordinates[c]).map((city, idx) => (
+                <Marker key={idx} position={cityCoordinates[city]}>
+                  <Popup>{city}</Popup>
+                </Marker>
+              ))}
+              {edges.map((edge, i) => {
+                const [cityA, cityB] = edge.nodes;
+                const coordA = cityCoordinates[cityA];
+                const coordB = cityCoordinates[cityB];
+                if (coordA && coordB) {
+                  return <Polyline key={i} positions={[coordA, coordB]} pathOptions={{ color: 'red', weight: 3 }} />;
+                }
+                return null;
+              })}
+            </MapContainer>
+          </div>
+
+
+
+
+
+          {visualize && (
+            <div className="results right-of-map">
+            <h3>Simulation Results</h3>
+            <table>
+              <thead>
+                <tr>
+                  <th>#</th>
+                  <th>Link</th>
+                  <th>Protocol</th>
+                  <th>QBER</th>
+                  <th>Sender Last Sent</th>
+                  <th>Receiver Last Recv</th>
+                  <th>Distance (km)</th>
+                  <th>Wavelength (nm)</th>
+                  <th>Pol Error</th>
+                  <th>Attenuation</th>
+                  <th>Depol Prob</th>
+                </tr>
+              </thead>
+              <tbody>
+                {simulationResults.map((res, idx) => {
+                  const nodes = Object.keys(res.nodes);
+                  const sender = nodes.find(n => res.nodes[n].last_sent_time);
+                  const receiver = nodes.find(n => res.nodes[n].last_recv_time);
+                  const hw = res.hardware_stats;
+          
+                  return (
+                    <tr key={idx}>
+                      <td>{idx + 1}</td>
+                      <td>{res.link}</td>
+                      <td>{res.protocol}</td>
+                      <td>{res.qber}</td>
+                      <td>{sender ? res.nodes[sender].last_sent_time : "N/A"}</td>
+                      <td>{receiver ? res.nodes[receiver].last_recv_time : "N/A"}</td>
+                      <td>{(hw.distance_m / 1000).toFixed(2)}</td>
+                      <td>{hw.pulse_wavelength_nm}</td>
+                      <td>{hw.pol_err_std}</td>
+                      <td>{hw.attenuation_db_per_m}</td>
+                      <td>{hw.depol_prob}</td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+          
+          )}
         </div>
-        {visualize && (
-  <div className="results right-of-map">
-    <h3>Simulation Results</h3>
-    <table>
-      <thead>
-        <tr>
-          <th>#</th>
-          <th>Link</th>
-          <th>Protocol</th>
-          <th>QBER</th>
-          <th>Sender Last Sent</th>
-          <th>Receiver Last Recv</th>
-        </tr>
-      </thead>
-      <tbody>
-        {simulationResults.map((res, idx) => {
-          const nodes = Object.keys(res.nodes);
-          const sender = nodes.find(n => res.nodes[n].last_sent_time);
-          const receiver = nodes.find(n => res.nodes[n].last_recv_time);
-
-          return (
-            <tr key={idx}>
-              <td>{idx + 1}</td>
-              <td>{res.link}</td>
-              <td>{res.protocol}</td>
-              <td>{res.qber}</td>
-              <td>{sender ? res.nodes[sender].last_sent_time : "N/A"}</td>
-              <td>{receiver ? res.nodes[receiver].last_recv_time : "N/A"}</td>
-            </tr>
-          );
-        })}
-      </tbody>
-    </table>
-  </div>
-)}
-
-      </div>
       </div>
     </div>
   );
