@@ -1,0 +1,11 @@
+site_name: Quantum Simulator
+theme:
+  name: readthedocs
+
+nav:
+  - Home: index.md
+  - Usage Guide: Usage.md
+  - Hardware: Hardware.md
+  - Protocol: Protocols.md
+  - Topology: Topology.md
+  - Utils: Utility.md
