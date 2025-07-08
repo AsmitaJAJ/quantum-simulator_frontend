@@ -20,9 +20,10 @@ class OpticalChannel:
 
 '''Inherits from optical channel. But it also has the feature of depolarization of the pulse as an added extra'''
 class QuantumChannel(OpticalChannel):
-    def __init__(self, name, length_meters, attenuation_db_per_m, depol_prob=0.0, light_speed=2e8):
+    def __init__(self, name, length_meters, attenuation_db_per_m, depol_prob=0.0, light_speed=2e8, pol_err_std=None):
         super().__init__(name, length_meters, attenuation_db_per_m, light_speed) 
         self.depol_prob = depol_prob
+        self.pol_err_std=pol_err_std
 
     def transmit(self, pulse):
         loss_prob = self.compute_loss()

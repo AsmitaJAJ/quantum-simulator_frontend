@@ -1,35 +1,60 @@
-from entanglement_manage import measure_bell_pair_event_model
-import random
-num_trials = 10000
-error_rate = 0.02  # Simulated QBER (2%)
+import numpy as np
+import sys
+import os
+from collections import Counter
 
-# Count outcomes for each basis choice
-results = {
-    ('Z', 'Z'): [],
-    ('X', 'X'): [],
-    ('Z', 'X'): [],
-    ('X', 'Z'): []
-}
+# Ensure parent directory is in path
+sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
+
+from Hardware.gates import H, CX
+from Hardware.state import QuantumState
+from Hardware.node import Node
+from utils.entanglement_manage import EntanglementManager
+
+# === Dummy Environment ===
+class DummyEnv:
+    def __init__(self):
+        self.now = 0  # Placeholder for SimPy
+
+env = DummyEnv()
+
+# === Create Nodes ===
+alice = Node("Alice", env)
+bob = Node("Bob", env)
+
+# === Create Entanglement Manager ===
+manager = EntanglementManager()
+
+# === Both Nodes Measure in Z Basis (should always be perfectly correlated) ===
+num_trials = 1000
+results = []
 
 for _ in range(num_trials):
-    # Randomly select bases for Alice and Bob
-    basis_a = random.choice(['Z', 'X'])
-    basis_b = random.choice(['Z', 'X'])
+    # 1. Create fresh entangled pair each round
+    pair_id, bell_state = manager.create_bell_pair(alice, bob, bell_type='00')  # You need to return both pair_id and state
 
-    bit_a, bit_b = measure_bell_pair_event_model(basis_a, basis_b, error_rate=error_rate)
+    # 2. Update each node's active pair_id for this round
+    alice.pair_id = pair_id
+    bob.pair_id = pair_id
 
-    results[(basis_a, basis_b)].append((bit_a, bit_b))
+    # 3. Alice and Bob measure
+    a_outcome = alice.measure_entangled_qubit(basis='Z')
+    b_outcome = bob.measure_entangled_qubit(basis='Z')
 
-# Compute and display stats
-for bases, outcomes in results.items():
-    total = len(outcomes)
-    if total == 0:
-        continue
+    results.append((a_outcome, b_outcome))
 
-    same = sum(1 for a, b in outcomes if a == b)
-    diff = total - same
-    qber = diff / total if total else None
+# === Analyze Correlation ===
+counts = Counter(results)
 
-    print(f"Basis {bases[0]}-{bases[1]}: {total} rounds")
-    print(f"   Correlated: {same} times ({same / total:.2%})")
-    print(f"   QBER: {qber:.2%}\n")
+print("\n=== Measurement Results (Z basis) ===")
+for outcome, count in counts.items():
+    print(f"Alice: {outcome[0]}, Bob: {outcome[1]} → {count} times")
+
+correlated = counts.get((0, 0), 0) + counts.get((1, 1), 0)
+print(f"\nCorrelation: {correlated / num_trials:.2%} expected ~100% for Φ⁺ state.")
+
+
+print("\nExample Bell state amplitudes (last round):")
+print(np.round(bell_state, 3))
+print("Alice state id:", id(alice.components[pair_id]))
+print("Bob state id:", id(bob.components[pair_id]))
