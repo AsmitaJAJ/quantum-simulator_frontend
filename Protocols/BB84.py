@@ -11,7 +11,7 @@ from Hardware.pulse import Pulse
 from Hardware.snspd import SNSPD
 from Hardware.PBS import PolarizingBeamSplitter
 from Hardware.HWP import HalfWavePlate
-
+from utils import key_rate
 
 # Error parameters (tune as needed)
 POL_ERR_STD = 1.0            # degrees → perfect polarization preservation
@@ -56,7 +56,7 @@ class Alice(Node):
 
             pulse = Pulse(wavelength=1550e-9, duration=70e-12, amplitude=1.0, polarization=0.0)
             pulse.mean_photon_number = 10
-            pulse.pulse_id = i  # ✅ attach unique pulse ID
+            pulse.pulse_id = i  # easier to use for qber calculation
             hwp = HalfWavePlate(theta_deg=hwp_angle)
             pulse = hwp.apply(pulse)
 
@@ -69,7 +69,7 @@ class Alice(Node):
             self.sent_pulses.append(pulse)
 
             self.send(port_id, pulse)
-            yield self.env.timeout(1e-9)
+            yield self.env.timeout(1e-9) #frequency of pulse= 1/1ns = 10^9 Hz / 1GHz
 
 
 
@@ -184,15 +184,18 @@ def run_bb84(alice: Alice, bob: Bob, channel:QuantumChannel, env, num_pulses=100
     #print(f"Alice sifted key: {sifted_alice}")
     #print(f"Bob   sifted key: {sifted_bob}")
     #print(f"Sifted key length: {len(sifted_alice)}")
+    sim_time = (num_pulses + 10) * 1e-9
+    sifted_key_rate = len(sifted_alice) / sim_time
 
     if sifted_alice:
         errors = sum(a != b for a, b in zip(sifted_alice, sifted_bob))
         qber   = errors / len(sifted_alice)
         
-        #print(f"QBER on sifted key: {qber:.2%}")
-        return qber
+        asym_key_rate=key_rate.compute_key_rate(qber, sifted_key_rate)
+        return qber, asym_key_rate
+
     else:
-        return 0.0
+        return None, None
         print("No sifted bits to compute QBER.")
    
 

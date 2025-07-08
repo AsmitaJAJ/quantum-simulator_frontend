@@ -5,7 +5,7 @@ import numpy as np
 
 # Ensure parent directory is in path
 sys.path.append(os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
-
+from utils import key_rate
 from Hardware.node import Node
 from Hardware.lasers import Laser
 from Hardware.channel import QuantumChannel
@@ -154,12 +154,16 @@ def run_cow(alice, bob, channel, env, num_pulses=1000):
                 alice_key[current_bin + bin_delay] = bit
             current_bin += 1
 
+
     bob_key = {t: b for t, b in bob.sifted_key}
     common = set(alice_key) & set(bob_key)
     errors = sum(1 for t in common if alice_key[t] != bob_key[t])
     qber = errors / len(common) if common else 0
-    rate = len(common) / ((num_pulses * 2) * 1e-9)
-    return qber
+    sim_time = (num_pulses + 10) * 1e-9
+    sifted_key_rate = len(common) / sim_time
+    asym_key_rate=key_rate.compute_key_rate(qber, sifted_key_rate)
+    return qber, asym_key_rate
+    
     print("Alice pulses sent:", num_pulses * 2)
     print("Bob sifted bits  :", len(bob.sifted_key))
     print("Matched key bits :", sorted(common))

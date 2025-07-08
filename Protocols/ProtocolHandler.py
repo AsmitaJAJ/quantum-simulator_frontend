@@ -5,6 +5,7 @@ class ProtocolHandler:
         self.channel_factory = channel_factory
         self.run_function = run_function
         self.qber=None
+        self.asym_key_rate=None 
         self.node_objs = {} 
 
     def run(self, config):
@@ -36,6 +37,6 @@ class ProtocolHandler:
         channel = self.channel_factory(a, b, **channel_args)
 
        # self.run_function(node_objs[a], node_objs[b], channel, env, **config.get("protocol_args", {}))
-        self.qber = self.run_function(
+        self.qber, self.asym_key_rate = self.run_function(
             self.node_objs[a], self.node_objs[b], channel, env, **config.get("protocol_args", {})
         )

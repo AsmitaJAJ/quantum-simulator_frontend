@@ -239,6 +239,7 @@ function Network() {
                   <th>Link</th>
                   <th>Protocol</th>
                   <th>QBER</th>
+                  <th>Key Rate</th>
                   <th>Sender Last Sent</th>
                   <th>Receiver Last Recv</th>
                   <th>Distance (km)</th>
@@ -246,6 +247,7 @@ function Network() {
                   <th>Pol Error</th>
                   <th>Attenuation</th>
                   <th>Depol Prob</th>
+
                 </tr>
               </thead>
               <tbody>
@@ -261,6 +263,7 @@ function Network() {
                       <td>{res.link}</td>
                       <td>{res.protocol}</td>
                       <td>{res.qber}</td>
+                      <td>{res.key_rate}</td>
                       <td>{sender ? res.nodes[sender].last_sent_time : "N/A"}</td>
                       <td>{receiver ? res.nodes[receiver].last_recv_time : "N/A"}</td>
                       <td>{(hw.distance_m / 1000).toFixed(2)}</td>

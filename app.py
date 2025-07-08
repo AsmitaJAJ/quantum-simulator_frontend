@@ -42,7 +42,8 @@ def simulate():
     results = []
 
     for edge in edges:
-        node_a, node_b = edge
+        node_a, node_b = edge["nodes"]
+        distance = edge["distance"]
         protocol_name = protocols_per_edge.get(f"{node_a}-{node_b}") or protocols_per_edge.get(f"{node_b}-{node_a}")
         if protocol_name not in protocols:
             return jsonify({"error": f"Unsupported protocol: {protocol_name}"}), 400
@@ -57,26 +58,36 @@ def simulate():
         config = {
             "env": env,
             "nodes": {
-                node_a: {"role": "Sender", "args": {"num_pulses": 100000}},
+                node_a: {"role": "Sender", "args": {"num_pulses": 1000000}},
                 node_b: {"role": "Receiver", "args": {}}
             },
             "channel": {
                 "endpoints": (node_a, node_b),
-                "args": {"length_meters": 90000, "attenuation_db_per_m": 0.0002, "depol_prob": 0.1}
+                "args": {"length_meters": distance, "attenuation_db_per_m": 0.0002, "depol_prob": 0.1, "pol_err_std": 1.0}
             },
-            "protocol_args": {"num_pulses": 100000}
+            "protocol_args": {"num_pulses": 1000000}
         }
 
         handler.run(config)
 
         qber = handler.qber
-
-        result = {
-            "protocol": protocol_name,
-            "link": f"{node_a} <--> {node_b}",
-            "qber": round(qber, 4),
-            "nodes": {}
+        asym_key_rate=handler.asym_key_rate
+        hardware_stats = {
+        "distance_m": distance,
+        "attenuation_db_per_m": config["channel"]["args"]["attenuation_db_per_m"],
+        "depol_prob": config["channel"]["args"]["depol_prob"],
+        "pol_err_std": config["channel"]["args"]["pol_err_std"],
+        "pulse_wavelength_nm": 1550  # example: 1550nm typical telecom wavelength
         }
+        result = {
+        "protocol": protocol_name,
+        "link": f"{node_a} <--> {node_b}",
+        "qber": round(qber, 4) if qber is not None else None,
+        "key_rate": round(asym_key_rate, 4) if asym_key_rate is not None else 0.0,
+        "nodes": {},
+        "hardware_stats": hardware_stats
+}
+
 
         for node_name in [node_a, node_b]:
             node = handler.node_objs.get(node_name)
