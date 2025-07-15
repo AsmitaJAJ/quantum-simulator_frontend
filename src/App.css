@@ -1,9 +1,9 @@
 :root {
-  font-family: Inter, sans-serif;
+  font-family: monospace;
   font-feature-settings: 'liga' 1, 'calt' 1;
 }
 @supports (font-variation-settings: normal) {
-  :root { font-family: InterVariable, sans-serif; }
+  :root { font-family: 'Courier New', Courier, monospace }
 }
 :root {
   --primary-color: #ffffff;

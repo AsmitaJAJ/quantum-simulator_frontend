@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
+import styled from 'styled-components';
 import './App.css';
-import GitNav from './GitNav';
-import ReadMore from './ReadMore';
+import GitNav from './GithubNav';
 import icon from './assets/icon.gif';
 import qkd from './assets/qkd.png'
 import { Link } from 'react-router-dom';
@@ -16,7 +16,7 @@ const App = () => {
           <ul className="nav-links">
             <li><a href="#home" className='menu__link'>Home</a></li>
             <li><a href="#features" className='menu__link'>Features</a></li>
-            <li><a href="#documentation" className='menu__link'>Documentation</a></li>
+            <li><a href="https://anuzka115.github.io/quantum-simulator/" className='menu__link'>Documentation</a></li>
             <GitNav/>
           </ul>
         </div>
@@ -32,7 +32,11 @@ const App = () => {
               Implement a combination of core quantum mechanics, networking protocols, and real-world constraints. 
               Visualise and simulate protocols before deploying.
             </p>
-            <ReadMore/>
+            <StyledWrapper>
+      <button>
+        Read More
+      </button>
+    </StyledWrapper>
           </div>
           <div className="hero-image">
             <div className="quantum-visualization">
@@ -71,5 +75,29 @@ const App = () => {
     </div>
   );
 };
+const StyledWrapper = styled.div`
+  button {
+    width: fit-content;
+    min-width: 100px;
+    height: 45px;
+    padding: 8px;
+    border-radius: 5px;
+    border: 2.5px solid #E0E1E4;
+    box-shadow: 0px 0px 20px -20px;
+    cursor: pointer;
+    background-color: white;
+    transition: all 0.2s ease-in-out 0ms;
+    user-select: none;
+    font-family: 'Poppins', sans-serif;
+  }
+
+  button:hover {
+    background-color: #F2F2F2;
+    box-shadow: 0px 0px 20px -18px;
+  }
+
+  button:active {
+    transform: scale(0.95);
+  }`;
 
 export default App;

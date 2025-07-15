@@ -65,7 +65,7 @@ def simulate():
                 "endpoints": (node_a, node_b),
                 "args": {"length_meters": distance, "attenuation_db_per_m": 0.0002, "depol_prob": 0.1, "pol_err_std": 1.0}
             },
-            "protocol_args": {"num_pulses": 100}
+            "protocol_args": {"num_pulses": 10}
         }
 
         handler.run(config)
