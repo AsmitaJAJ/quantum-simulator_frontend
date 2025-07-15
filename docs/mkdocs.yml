@@ -9,3 +9,5 @@ nav:
   - Protocol: Protocols.md
   - Topology: Topology.md
   - Utils: Utility.md
+
+site_url: https://anuzka115.github.io/quantum-simulator/

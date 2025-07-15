@@ -6,4 +6,4 @@ It features a visual simulator for quantum key distribution (QKD) protocols, wit
 
 ## Documentation
 
-For full documentation, visit: [https://yourusername.github.io/quantum-simulator](placeholder link)
+For full documentation, visit [docs](https://anuzka115.github.io/quantum-simulator/)
