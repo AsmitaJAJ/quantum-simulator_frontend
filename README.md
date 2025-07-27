@@ -6,4 +6,5 @@ It features a visual simulator for quantum key distribution (QKD) protocols, wit
 
 ## Documentation
 
+The frontend is developed usinf React, and is integrated with the backend in app.py. For any fine tuning, change parameters in app.py.
 For full documentation, visit [docs](https://anuzka115.github.io/quantum-simulator/)
